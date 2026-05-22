@@ -18,7 +18,7 @@ public class MoviesController : Controller
     }
 
 // GET: Movies
-public async Task<IActionResult> Index(string movieGenre, string searchString)
+public async Task<IActionResult> Index(string movieGenre, string searchString, string? searchYear)
 {
     if (_context.Movie == null)
     {
@@ -37,6 +37,14 @@ public async Task<IActionResult> Index(string movieGenre, string searchString)
         movies = movies.Where(s => s.Title!.ToUpper().Contains(searchString.ToUpper()));
     }
 
+    if (!string.IsNullOrEmpty(searchYear))
+    {
+        if (int.TryParse(searchYear, out var year))
+        {
+            movies = movies.Where(m => m.ReleaseDate.Year == year);
+        }
+    }
+
     if (!string.IsNullOrEmpty(movieGenre))
     {
         movies = movies.Where(x => x.Genre == movieGenre);
@@ -46,6 +54,7 @@ public async Task<IActionResult> Index(string movieGenre, string searchString)
     {
         Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
         Movies = await movies.ToListAsync()
+        ,SearchYear = searchYear
     };
 
     return View(movieGenreVM);
